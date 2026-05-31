@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Terminy Sadowe",
-  description: "Prosty starter aplikacji Next.js.",
+  title: "Terminy sądowe",
+  description: "Mobile-first kalkulator biegu terminów sądowych.",
 };
 
 export default function RootLayout({
