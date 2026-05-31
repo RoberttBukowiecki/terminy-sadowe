@@ -13,6 +13,7 @@ const unitLabels: Record<DeadlineUnit, string> = {
   months: "miesiące",
   years: "lata",
 };
+const calendarWeekdays = ["Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd"];
 
 function getTodayInputValue(): string {
   const now = new Date();
@@ -39,11 +40,53 @@ function formatDayCount(days: number): string {
   return `${days} dni`;
 }
 
+function parseInputDate(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function formatCalendarMonth(value: string): string {
+  return new Intl.DateTimeFormat("pl-PL", {
+    month: "long",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(parseInputDate(value));
+}
+
+function buildCalendarDays(selectedDate: string) {
+  const selected = parseInputDate(selectedDate);
+  const year = selected.getUTCFullYear();
+  const month = selected.getUTCMonth();
+  const selectedDay = selected.getUTCDate();
+  const firstDay = new Date(Date.UTC(year, month, 1));
+  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const leadingEmptyDays = (firstDay.getUTCDay() + 6) % 7;
+
+  return [
+    ...Array.from({ length: leadingEmptyDays }, (_, index) => ({
+      key: `empty-${index}`,
+      day: null,
+      isSelected: false,
+    })),
+    ...Array.from({ length: daysInMonth }, (_, index) => {
+      const day = index + 1;
+
+      return {
+        key: `day-${day}`,
+        day,
+        isSelected: day === selectedDay,
+      };
+    }),
+  ];
+}
+
 export default function Home() {
   const [startDate, setStartDate] = useState(() => getTodayInputValue());
   const [amount, setAmount] = useState(14);
   const [unit, setUnit] = useState<DeadlineUnit>("days");
   const [pauses, setPauses] = useState<PauseRange[]>([]);
+  const [shiftNonWorkingDeadline, setShiftNonWorkingDeadline] = useState(true);
 
   const result = useMemo(
     () =>
@@ -52,9 +95,25 @@ export default function Home() {
         amount,
         unit,
         pauses,
+        shiftNonWorkingDeadline,
       }),
-    [amount, pauses, startDate, unit],
+    [amount, pauses, shiftNonWorkingDeadline, startDate, unit],
   );
+  const effectiveAmount = Math.max(1, Math.floor(amount || 1));
+  const explanationSteps = [
+    `Zaczynamy od daty: ${result.startDate}. Tego dnia nie wliczamy do terminu.`,
+    `Liczymy ${effectiveAmount} ${unitLabels[unit]}. Bez przerw daje to datę ${result.baseDeadline}.`,
+    result.pauseDays > 0
+      ? `Przerwy zatrzymują licznik na ${formatDayCount(result.pauseDays)}. Po ich doliczeniu wychodzi ${result.deadlineBeforeBusinessDayShift}.`
+      : "Nie dodano przerw, więc nic nie wydłuża terminu.",
+    result.businessDayShiftDays > 0
+      ? `Ta data wypada w sobotę, niedzielę albo święto, więc przesuwamy ją o ${formatDayCount(result.businessDayShiftDays)}.`
+      : shiftNonWorkingDeadline
+        ? "Data końcowa nie wymaga przesunięcia z weekendu ani święta."
+        : "Przesunięcie z weekendu i święta jest wyłączone.",
+    `Ostateczny ostatni dzień terminu: ${result.finalDeadline}.`,
+  ];
+  const calendarDays = buildCalendarDays(result.finalDeadline);
 
   function updatePause(id: string, field: "from" | "to", value: string) {
     setPauses((current) =>
@@ -219,11 +278,57 @@ export default function Home() {
               </div>
             ))}
           </div>
+
+          <label className="switch-row">
+            <span>
+              <strong>Przesuwaj koniec z weekendu i święta</strong>
+              <small>
+                Gdy ostatni dzień wypada w sobotę, niedzielę albo święto.
+              </small>
+            </span>
+            <input
+              checked={shiftNonWorkingDeadline}
+              onChange={(event) =>
+                setShiftNonWorkingDeadline(event.target.checked)
+              }
+              type="checkbox"
+            />
+          </label>
         </form>
 
         <aside className="panel result-panel" aria-live="polite">
           <p className="result-label">Termin upływa</p>
           <div className="result-date">{result.finalDeadline}</div>
+
+          <div className="calendar-preview" aria-label="Podgląd miesiąca">
+            <div className="calendar-header">
+              <span>Kalendarz</span>
+              <strong>{formatCalendarMonth(result.finalDeadline)}</strong>
+            </div>
+            <div className="calendar-grid" aria-hidden="true">
+              {calendarWeekdays.map((weekday) => (
+                <span className="calendar-weekday" key={weekday}>
+                  {weekday}
+                </span>
+              ))}
+              {calendarDays.map((item) =>
+                item.day === null ? (
+                  <span className="calendar-day is-empty" key={item.key} />
+                ) : (
+                  <span
+                    className={
+                      item.isSelected
+                        ? "calendar-day is-selected"
+                        : "calendar-day"
+                    }
+                    key={item.key}
+                  >
+                    {item.day}
+                  </span>
+                ),
+              )}
+            </div>
+          </div>
 
           <dl className="result-stats">
             <div>
@@ -247,14 +352,9 @@ export default function Home() {
           <div className="timeline">
             <h2>Jak policzono</h2>
             <ul>
-              <li>Nie liczymy dnia początkowego.</li>
-              {result.timeline.map((item) => (
+              {explanationSteps.map((item) => (
                 <li key={item}>{item}</li>
               ))}
-              <li>
-                Jeśli ostatni dzień wypada w sobotę, niedzielę albo święto
-                ustawowe, termin przesuwa się na najbliższy dzień roboczy.
-              </li>
             </ul>
           </div>
         </aside>

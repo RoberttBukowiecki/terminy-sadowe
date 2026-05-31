@@ -139,6 +139,41 @@ h2 {
   line-height: 1.55;
 }
 
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #ebe8df;
+  border-radius: 8px;
+  background: #fbfaf6;
+  margin-top: 1rem;
+  padding: 0.85rem;
+}
+
+.switch-row span {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.switch-row strong {
+  color: #2c2f2a;
+  font-size: 0.9rem;
+}
+
+.switch-row small {
+  color: #686b62;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.switch-row input {
+  width: 2.7rem;
+  height: 1.45rem;
+  flex: 0 0 auto;
+  accent-color: #2e6b47;
+}
+
 .secondary-button,
 .icon-button {
   min-height: 2.55rem;
@@ -250,6 +285,76 @@ h2 {
   font-size: clamp(2rem, 11vw, 3.8rem);
   font-weight: 900;
   line-height: 1;
+}
+
+.calendar-preview {
+  margin-top: 1rem;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 8px;
+  background: #f8f5eb;
+  color: #242720;
+  padding: 0.85rem;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid #e4dfcf;
+  padding-bottom: 0.65rem;
+}
+
+.calendar-header span {
+  color: #6a6f62;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.calendar-header strong {
+  color: #20251f;
+  font-size: 0.98rem;
+  text-align: right;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.28rem;
+  margin-top: 0.75rem;
+}
+
+.calendar-weekday,
+.calendar-day {
+  display: grid;
+  min-height: 2rem;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.calendar-weekday {
+  color: #7d8275;
+  min-height: 1.35rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.calendar-day {
+  background: #fffdf7;
+  color: #383b35;
+}
+
+.calendar-day.is-empty {
+  background: transparent;
+}
+
+.calendar-day.is-selected {
+  background: #2e6b47;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgb(46 107 71 / 28%);
 }
 
 .result-stats {

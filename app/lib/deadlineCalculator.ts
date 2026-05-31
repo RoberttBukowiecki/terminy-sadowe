@@ -21,6 +21,7 @@ export type DeadlineCalculationInput = {
   amount: number;
   unit: DeadlineUnit;
   pauses: PauseRange[];
+  shiftNonWorkingDeadline: boolean;
 };
 
 export type DeadlineCalculationResult = {
@@ -31,7 +32,6 @@ export type DeadlineCalculationResult = {
   pauseDays: number;
   businessDayShiftDays: number;
   normalizedPauses: NormalizedPauseRange[];
-  timeline: string[];
 };
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -263,8 +263,6 @@ export function calculateDeadline(
     deadlineBeforeBusinessDayShift,
     input.pauses,
   );
-  const timeline = [`Termin podstawowy: ${baseDeadline}.`];
-
   for (let guard = 0; guard < 3660; guard += 1) {
     const nextDeadline = formatDate(
       addDays(parseDate(baseDeadline), pauseData.pauseDays),
@@ -282,21 +280,12 @@ export function calculateDeadline(
     );
   }
 
-  if (pauseData.pauseDays > 0) {
-    timeline.push(
-      `Przerwy w biegu terminu dodają ${pauseData.pauseDays} dni kalendarzowych.`,
-    );
-  }
-
-  const { finalDeadline, shiftDays } = moveToNextWorkingDeadlineDay(
-    deadlineBeforeBusinessDayShift,
-  );
-
-  if (shiftDays > 0) {
-    timeline.push(
-      `Koniec przypadał w sobotę albo dzień ustawowo wolny, więc został przesunięty o ${shiftDays} dni.`,
-    );
-  }
+  const { finalDeadline, shiftDays } = input.shiftNonWorkingDeadline
+    ? moveToNextWorkingDeadlineDay(deadlineBeforeBusinessDayShift)
+    : {
+        finalDeadline: deadlineBeforeBusinessDayShift,
+        shiftDays: 0,
+      };
 
   return {
     startDate: input.startDate,
@@ -306,6 +295,5 @@ export function calculateDeadline(
     pauseDays: pauseData.pauseDays,
     businessDayShiftDays: shiftDays,
     normalizedPauses: pauseData.normalizedPauses,
-    timeline,
   };
 }
