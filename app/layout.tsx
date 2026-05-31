@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     url: ".",
     images: [
       {
-        url: "opengraph-image",
+        url: "og-image.png",
         width: 1200,
         height: 630,
         alt: "Terminy sądowe - kalkulator biegu terminów",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     title: "Terminy sądowe - kalkulator biegu terminów",
     description:
       "Oblicz datę końcową terminu, dodaj przerwy i sprawdź przesunięcia z weekendów oraz świąt.",
-    images: ["opengraph-image"],
+    images: ["og-image.png"],
   },
   icons: {
     icon: [
