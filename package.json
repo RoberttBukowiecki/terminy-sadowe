@@ -1,0 +1,29 @@
+{
+  "name": "terminy-sadowe",
+  "version": "0.1.0",
+  "description": "Starter aplikacji Next.js dla projektu terminy-sadowe.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "private": true,
+  "dependencies": {
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.2.6",
+    "prettier": "3.8.3",
+    "typescript": "6.0.3"
+  }
+}
